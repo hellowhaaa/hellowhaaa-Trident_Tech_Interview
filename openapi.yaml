@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  title: Course Selection System
+  version: 1.0.0
+  description: |
+    The Course Selection System API provides endpoints for students and teachers to interact with the course selection process.
+
+    ## Features:
+    - **Students** can:
+      - View available courses
+      - Enroll in courses
+      - Drop courses
+    
+    - **Teachers** can:
+      - Add new courses
+      - Update courses
+      - Delete existing courses
+  
+servers:
+  - url: https://api.example.com/v1
+    description: 正式環境
+  - url: https://api.stage
+    description: 測試環境
+
+paths:
+  /:
+    get:
+      operationId: root
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "hello, world"
+
+  /courses:
+    get:
+      description: Return all courses.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoursesTeacherResponse"
+
+              examples:
+                example1:
+                  summary: "Single course"
+                  value:
+                    datas:
+                      - courseID: 123
+                        courseName: "Improve your English"
+                        startTime: "08:30"
+                        endTime: "10:00"
+                        maxPeople: 10
+                        teacherID: 123
+                        teacherName: "Lily"
+                        teacherEmail: "Lily@gmail.com"
+                example2:
+                  summary: "Two courses"
+                  value:
+                    datas:
+                      - courseID: 123
+                        courseName: "Improve your English"
+                        startTime: "08:30"
+                        endTime: "10:00"
+                        maxPeople: 10
+                        teacherID: 123
+                        teacherName: "Lily"
+                        teacherEmail: "Lily@gmail.com"
+                      - courseID: 456
+                        courseName: "Learn Python"
+                        startTime: "08:30"
+                        endTime: "10:00"
+                        maxPeople: 15
+                        teacherID: 456
+                        teacherName: "John"
+                        teacherEmail: "john@example.com"
+  /teachers:
+    get:
+      description: Return all teachers' information
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeachersResponse"
+              examples:
+                example1:
+                  summary: "Example with one teacher"
+                  value:
+                    datas:
+                      - teacherID: 123
+                        name: "Ben"
+                        email: "Ben123@gmail.com"
+                example2:
+                  summary: "Example with two teachers"
+                  value:
+                    datas:
+                      - teacherID: 123
+                        name: "Ben"
+                        email: "Ben123@gmail.com"
+                      - teacherID: 456
+                        name: "Nana"
+                        email: "Nana@gmail.com"
+
+    post:
+      description: Create new teacher
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeacherRequest"
+            examples:
+                example1:
+                  summary: "Example of creating a teacher information"
+                  value:
+                    name: "Ben"
+                    email: "Ben123@gmail.com"
+                    password: "password123"
+      
+      
+      responses:
+        '200':  
+          description: Successful Response
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/CreateTeacherResponse"
+
+
+
+
+
+
+
+  /teachers/{teacher_id}/courses:
+    parameters:
+      - name: teacher_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/TeacherCoursesResponse"
+               
+              examples:
+                example1:
+                  summary: "Example with courses"
+                  value:
+                    datas:
+                      - courseID: 123
+                        courseName: "Improve your math!"
+                        startTime: "8:30"
+                        endTime: "10:30"
+                        maxPeople: 10
+                        
+                      - courseID: 445
+                        courseName: "Improve your Chinese!"
+                        startTime: "10:30"
+                        endTime: "12:30"
+                        maxPeople: 20
+              
+    post:
+      description: Create a course
+      requestBody: 
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/CreateCourseRequest"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCourseResponse"
+  
+  
+  /courses/{course_id}:
+    parameters:
+      - name: course_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      description: Update course content
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourseRequest"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCourseResponse" 
+    delete:
+      description: Delete a course
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+
+components:
+  schemas:
+    CoursesTeacherResponse:
+      type: object
+      properties:
+        datas:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoursesTeacher"
+      
+
+    CoursesTeacher:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          properties:
+            teacherID:
+              type: integer
+              example: 123
+            teacherName:
+              type: string
+              example: "Lily"
+            teacherEmail: 
+              type: string
+              example: "Lily@gamil.com"
+        
+
+    TeachersResponse:
+      type: object
+      properties:
+        datas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Teacher"
+
+    Teacher:
+      type: object
+      properties:
+        teacherID:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: "Ben"
+        email:
+          type: string
+          example: "Ben123@gamil.com"
+
+    TeacherCoursesResponse:
+      type: object
+      properties:
+        datas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+
+    Course:
+      type: object
+      properties:
+        courseID:
+          type: integer
+          example: 123
+        courseName:
+          type: string
+          example: "Improve your English"
+        startTime:
+          type: string
+          format: time
+          example: "08:30"
+        endTime:
+          type: string
+          format: time
+          example: "10:30"
+        maxPeople: 
+          type: integer
+          example: 10
+
+    CreateTeacherRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Ben"
+        email:
+          type: string
+          example: "Ben123@gamil.com"
+        password:
+          type: string
+          example: "password123"
+    
+    CreateTeacherResponse:
+      type: object
+      properties:
+        teacherID:
+          type: integer
+          example: 43690
+        name:
+          type: string
+          example: "Ben"
+        email:
+          type: string
+          example: "Ben123@gamil.com"
+
+    CreateCourseRequest:
+      type: object
+      properties:
+        courseName:
+          type: string
+          example: "Improve your English"
+        startTime:
+          type: integer
+          example: "10:00"
+        endTime:
+          type: integer
+          example: "12:00"
+        maxPeople: 
+          type: integer
+          example: 10
+        teacherID:
+          type: integer
+          example: 1234
+
+    CreateCourseResponse:
+      allOf:
+      - $ref: "#/components/schemas/Course"
+      - type: object
+        properties:
+          teacherID:
+            type: integer
+            example: 1234
+
+
+
+
+
+
+
+
+
+     
